@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Colors } from 'react-native/Libraries/NewAppScreen'
 import {
   StatusBar,
@@ -6,10 +6,13 @@ import {
   Button,
   useColorScheme,
   View,
+  Text  
 } from 'react-native';
 
 import PictureList from './src/components/PictureList'
 import CameraDialog from './src/components/CameraDialog'
+import { StorageService } from './src/services/StorageService'
+import { PictureService } from './src/services/PictureService';
 
 const samples = [  
     {id: '1', url: 'https://images-na.ssl-images-amazon.com/images/I/81A-ir0rTSL._RI_.jpg'},
@@ -19,9 +22,9 @@ const samples = [
 ]
 
 function App() {
-  const [pictureList, setPictureList] = useState([...samples])
+  const [pictureList, setPictureList] = useState([]) //[...samples])
   const [isModalOpen, setIsModalOpen] = useState(false)
-
+  
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
@@ -29,19 +32,48 @@ function App() {
   };
 
   function onPictureSelect(item) {
+    PictureService.selectPicture(item, onRemove)
+  }
 
+  async function onRemove (item) {
+    const lista = pictureList.filter(listItem => listItem.id !== item.id)
+
+    await StorageService.set('picturelist', lista)
+    setPictureList(lista)
   }
 
   function openModal() {
     setIsModalOpen(true)
   }
 
-  function closeModal(response) {
+  async function closeModal(response) {
     setIsModalOpen(false)
+
+    if (typeof response === 'string') {
+      const newItem = {url: response, id: (Date.now()).toString()}
+      const lista = [...pictureList, newItem]
+      
+      await StorageService.set('pictureList')
+      setPictureList([...lista])
+    }
   }
 
+  useEffect(() => {
+    async function getList() {
+      let lista = await StorageService.get('pictureList')
+      if (!lista || lista.length == 0) {
+        await StorageService.set('pictureList', samples)
+        lista = await StorageService.get('pictureList') || []
+      }    
+      setPictureList(lista)      
+    }
+
+    getList()
+  }, [])
+  
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Galeria de Fotos</Text>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 
       <PictureList 
@@ -64,7 +96,6 @@ function App() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 32,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -75,7 +106,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#999',
     width: '100%',
     textAlign: 'center'
-  }
+  },
+  title: {
+    width: '100%',
+    fontWeight: 'bold', 
+    color: 'indigo',
+    backgroundColor: 'burlywood',
+    textAlign: 'center',
+    fontSize: 18
+  } 
 });
 
 export default App;

@@ -10,8 +10,12 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.15.5",
+    "@react-native-clipboard/clipboard": "^1.8.1",
     "react": "17.0.1",
-    "react-native": "0.64.1"
+    "react-native": "0.64.1",
+    "react-native-fs": "^2.18.0",
+    "react-native-share": "^6.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

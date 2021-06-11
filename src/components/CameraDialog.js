@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { 
     StyleSheet, 
     View, 
@@ -6,28 +6,44 @@ import {
     Modal, 
     TouchableOpacity,
     Text, 
-    Button 
+    Button     
 } from 'react-native'
 
+import Clipboard from '@react-native-clipboard/clipboard'
+import { PictureService } from '../services/PictureService'
 const camera = require('../images/camera.png')
 
 function CameraDialog(props) {    
     const [currentImage, setCurrentImage] = useState('')
 
     const onClose = props.onClose ? props.onClose : () => {}
-    const picture = currentImage ? {uri: currentImage} : camera
+    const picture = currentImage ? {uri: currentImage} : camera    
     
-    function getImageFromClipboard() {
-
+    async function getImageFromClipboard() {
+        const imageUrl = await Clipboard.getString()
+        const extensions = ['.png', '.jpg', '.jpeg']
+        const isImage = extensions.some(ext => (
+            imageUrl.toLowerCase().includes(ext)
+        ))
+        
+        if (isImage) {
+            setCurrentImage(imageUrl)
+        }
     }
 
     function shot() {
 
     }
 
-    function save() {
-        onClose()
+    async function save() {
+        const response = await PictureService.save(currentImage)
+        //console.log('save', response)
+        onClose(response)
     }
+
+    useEffect(() => {
+        
+    }, [])
 
     return (
         <Modal
@@ -82,10 +98,10 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },  
     preview: {
-        width: 100,
-        height: 75,
         borderWidth: 2,
-        borderColor: 'black'
+        borderColor: 'black',
+        width: 80,
+        height: 80
     },
     closeButton: {
         padding: 15,

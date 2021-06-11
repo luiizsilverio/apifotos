@@ -4,7 +4,8 @@ import {
     Image, 
     FlatList, 
     TouchableHighlight,
-    StyleSheet
+    StyleSheet,
+    useWindowDimensions    
 } from 'react-native'
 
 function PictureList(props) {
@@ -22,7 +23,7 @@ function PictureList(props) {
                         onClick={on_Click}
                         item={item}
                     />                    
-                )}
+                )}                
             />
         </View>
     )
@@ -30,6 +31,7 @@ function PictureList(props) {
 
 function PictureListItem(props) {
     const {item} = props
+    const largura = useWindowDimensions().width / 3 - 8  
     
     return (
         <TouchableHighlight
@@ -37,7 +39,7 @@ function PictureListItem(props) {
         >
             <Image
                 source={{uri: item.url}}
-                style={styles.image}
+                style={[styles.image, {width: largura, height: largura}]}
             />
         </TouchableHighlight>
     )
@@ -48,9 +50,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     image: {
-        width: 80,
-        height: 80
-        
+        margin: 2        
     }
 })
 
