@@ -11,6 +11,8 @@ import {
 
 import Clipboard from '@react-native-clipboard/clipboard'
 import { PictureService } from '../services/PictureService'
+import { RNCamera } from 'react-native-camera'
+
 const camera = require('../images/camera.png')
 
 function CameraDialog(props) {    
@@ -31,8 +33,13 @@ function CameraDialog(props) {
         }
     }
 
-    function shot() {
+    async function shot() {
+        if (this.camera){
+            const options = {quality: 0.5, base64: true}
+            const data = await this.camera.takePictureAsync(options)
 
+            setCurrentImage(data.uri)
+        }
     }
 
     async function save() {
@@ -61,8 +68,14 @@ function CameraDialog(props) {
                         <Text style={styles.closeButton}>X</Text>
                     </TouchableOpacity>
                 </View>
-
-                <View>
+                    
+                <View style={styles.cameraContainer}>
+                    <RNCamera 
+                        style={styles.camera} 
+                        ref={ref => this.camera = ref}
+                        type={RNCamera.Constants.Type.front}
+                        flashMode={RNCamera.Constants.FlashMode.on}
+                    />
                 </View>
 
                 <View style={styles.buttonContainer}>
@@ -114,7 +127,17 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         height: 40,
         backgroundColor: 'gray'
-    }    
+    },
+    cameraContainer: {
+        flex: 1,
+        flexDirection: 'column'
+    },
+    camera: {
+        flex: 1,
+        height: 250,
+        justifyContent: 'flex-end',
+        alignItems: 'center'
+    }
 })
 
 export default CameraDialog
